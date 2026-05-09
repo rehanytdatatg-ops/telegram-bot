@@ -1,9 +1,9 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# =========================
+# ====================================
 # BOT SETTINGS
-# =========================
+# ====================================
 
 TOKEN = "8796684139:AAErNtwcP5jbdAvSKXqjx7LQLM4aKQGyuKY"
 
@@ -14,18 +14,15 @@ UPI_ID = "himanshudubey@fam"
 
 VIP_LINK = "https://t.me/+jinnhsyeEftlYTU0"
 
-# =========================
+# ====================================
 # START BOT
-# =========================
+# ====================================
 
 bot = telebot.TeleBot(TOKEN)
 
-# Store pending users
-pending_users = {}
-
-# =========================
+# ====================================
 # START COMMAND
-# =========================
+# ====================================
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -67,8 +64,9 @@ def start(message):
 ✅ Trusted Service
 ✅ Fast Verification
 ✅ HD Quality Access
+✅ Secure Payment
 
-💎 Premium Plan: ₹99
+💎 PREMIUM PLAN: ₹99
 
 ━━━━━━━━━━━━━━━
 
@@ -80,9 +78,9 @@ def start(message):
         reply_markup=markup
     )
 
-# =========================
+# ====================================
 # BUTTON HANDLER
-# =========================
+# ====================================
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call):
@@ -111,12 +109,11 @@ def callback(call):
 
 💎 Amount: ₹99
 
-✅ Pay via UPI or QR
-
 🏦 UPI ID:
-`{UPI_ID}`
+{UPI_ID}
 
-📸 Send payment screenshot after payment.
+✅ Pay via QR or UPI
+📸 Send screenshot after payment
 
 ⏳ Verification usually takes few minutes.
 
@@ -125,7 +122,6 @@ def callback(call):
 🛡 Admin:
 {ADMIN_USERNAME}
 """,
-            parse_mode="Markdown",
             reply_markup=markup
         )
 
@@ -142,10 +138,10 @@ def callback(call):
 ✅ HD Premium Content
 ✅ VIP Private Access
 ✅ Fast Support
-✅ Secure Access
-✅ Better Experience
+✅ Trusted Service
+✅ Smooth Experience
 
-💎 Premium Price: ₹99
+💎 Price: ₹99 Only
 """
         )
 
@@ -161,21 +157,20 @@ def callback(call):
 """
         )
 
-# =========================
+# ====================================
 # SCREENSHOT HANDLER
-# =========================
+# ====================================
 
 @bot.message_handler(content_types=['photo'])
 def payment_screenshot(message):
 
-    pending_users[message.chat.id] = True
-
+    # Reply to user
     bot.reply_to(
         message,
         """
-✅ PAYMENT SCREENSHOT RECEIVED
+✅ SCREENSHOT RECEIVED
 
-⏳ Admin will verify shortly.
+⏳ Waiting for admin verification.
 """
     )
 
@@ -186,8 +181,8 @@ def payment_screenshot(message):
         message.message_id
     )
 
-    # Admin buttons
-    markup = InlineKeyboardMarkup()
+    # Approve / Reject buttons
+    markup = InlineKeyboardMarkup(row_width=2)
 
     approve_btn = InlineKeyboardButton(
         "✅ APPROVE",
@@ -201,29 +196,33 @@ def payment_screenshot(message):
 
     markup.add(approve_btn, reject_btn)
 
+    # Notify admin
     bot.send_message(
         ADMIN_ID,
         f"""
-📩 New payment screenshot received.
+📩 NEW PAYMENT SCREENSHOT
 
-👤 User ID:
+👤 User:
+{message.from_user.first_name}
+
+🆔 User ID:
 {message.chat.id}
 """,
         reply_markup=markup
     )
 
-# =========================
+# ====================================
 # ADMIN APPROVAL SYSTEM
-# =========================
+# ====================================
 
 @bot.callback_query_handler(
     func=lambda call:
     call.data.startswith("approve_") or
     call.data.startswith("reject_")
 )
-def admin_actions(call):
+def admin_action(call):
 
-    # APPROVE
+    # APPROVE USER
     if call.data.startswith("approve_"):
 
         user_id = int(call.data.split("_")[1])
@@ -238,7 +237,7 @@ def admin_actions(call):
 🔗 VIP LINK:
 {VIP_LINK}
 
-⚠ Do not share link.
+⚠ Do not share this link.
 """
         )
 
@@ -247,7 +246,7 @@ def admin_actions(call):
             "User Approved"
         )
 
-    # REJECT
+    # REJECT USER
     elif call.data.startswith("reject_"):
 
         user_id = int(call.data.split("_")[1])
@@ -266,9 +265,10 @@ Please contact admin.
             "User Rejected"
         )
 
-# =========================
-# RUN BOT
-# =========================
+# ====================================
+# BOT RUN
+# ====================================
 
 print("🚀 Premium VIP Bot Running...")
+
 bot.infinity_polling()
