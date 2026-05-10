@@ -1,9 +1,12 @@
 import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import (
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
 
-# ====================================
+# ==========================================
 # BOT SETTINGS
-# ====================================
+# ==========================================
 
 TOKEN = "8796684139:AAErNtwcP5jbdAvSKXqjx7LQLM4aKQGyuKY"
 
@@ -12,31 +15,52 @@ ADMIN_USERNAME = "@Yhunalm"
 
 UPI_ID = "himanshudubey@fam"
 
-VIP_LINK = "https://t.me/+jinnhsyeEftlYTU0"
+# VIP LINKS
+LITE_LINK = "https://t.me/+jinnhsyeEftlYTU0"
+MEDIUM_LINK = "https://t.me/+jinnhsyeEftlYTU0"
+PREMIUM_LINK = "https://t.me/+jinnhsyeEftlYTU0"
 
-# ====================================
+# ==========================================
 # START BOT
-# ====================================
+# ==========================================
 
 bot = telebot.TeleBot(TOKEN)
 
-# ====================================
+# Store selected plans
+user_plan = {}
+
+# ==========================================
 # START COMMAND
-# ====================================
+# ==========================================
 
 @bot.message_handler(commands=['start'])
 def start(message):
 
     markup = InlineKeyboardMarkup(row_width=1)
 
-    buy_btn = InlineKeyboardButton(
-        "💎 BUY PREMIUM ₹99",
-        callback_data="buy"
+    lite_btn = InlineKeyboardButton(
+        "🥈 LITE VIP — ₹99",
+        callback_data="lite"
+    )
+
+    medium_btn = InlineKeyboardButton(
+        "🥇 MEDIUM VIP — ₹149",
+        callback_data="medium"
+    )
+
+    premium_btn = InlineKeyboardButton(
+        "👑 PREMIUM VIP — ₹199",
+        callback_data="premium"
     )
 
     feature_btn = InlineKeyboardButton(
         "🔥 VIP FEATURES",
         callback_data="features"
+    )
+
+    review_btn = InlineKeyboardButton(
+        "⭐ USER REVIEWS",
+        callback_data="reviews"
     )
 
     admin_btn = InlineKeyboardButton(
@@ -45,8 +69,11 @@ def start(message):
     )
 
     markup.add(
-        buy_btn,
+        lite_btn,
+        medium_btn,
+        premium_btn,
         feature_btn,
+        review_btn,
         admin_btn
     )
 
@@ -56,121 +83,200 @@ def start(message):
         message.chat.id,
         photo,
         caption=f"""
-🔥 VERIFIED PREMIUM ACCESS 🔥
+✨👑 VERIFIED VIP ACCESS 👑✨
 
 ━━━━━━━━━━━━━━━
 
-✅ Premium VIP Content
-✅ Trusted Service
-✅ Fast Verification
-✅ HD Quality Access
-✅ Secure Payment
-
-💎 PREMIUM PLAN: ₹99
+💎 Premium Telegram Experience
+⚡ Fast Verification
+🎬 HD Premium Content
+🛡 Trusted Service
+🚀 Instant Support
 
 ━━━━━━━━━━━━━━━
 
-🛡 Verified Admin:
+👑 VERIFIED ADMIN
 {ADMIN_USERNAME}
 
-👇 Choose Option Below
+👇 SELECT VIP PLAN BELOW
 """,
         reply_markup=markup
     )
 
-# ====================================
+# ==========================================
 # BUTTON HANDLER
-# ====================================
+# ==========================================
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call):
 
-    # BUY BUTTON
-    if call.data == "buy":
+    # ======================================
+    # LITE VIP
+    # ======================================
 
-        qr = open("qr.jpg", "rb")
+    if call.data == "lite":
 
-        markup = InlineKeyboardMarkup(row_width=1)
+        user_plan[call.message.chat.id] = "LITE VIP — ₹99"
 
-        done_btn = InlineKeyboardButton(
-            "✅ PAYMENT DONE",
-            callback_data="done"
-        )
+        send_payment(call, "LITE VIP", "₹99")
 
-        markup.add(done_btn)
+    # ======================================
+    # MEDIUM VIP
+    # ======================================
 
-        bot.send_photo(
-            call.message.chat.id,
-            qr,
-            caption=f"""
-💸 PREMIUM PAYMENT
+    elif call.data == "medium":
 
-━━━━━━━━━━━━━━━
+        user_plan[call.message.chat.id] = "MEDIUM VIP — ₹149"
 
-💎 Amount: ₹99
+        send_payment(call, "MEDIUM VIP", "₹149")
 
-🏦 UPI ID:
-{UPI_ID}
+    # ======================================
+    # PREMIUM VIP
+    # ======================================
 
-✅ Pay via QR or UPI
-📸 Send screenshot after payment
+    elif call.data == "premium":
 
-⏳ Verification usually takes few minutes.
+        user_plan[call.message.chat.id] = "PREMIUM VIP — ₹199"
 
-━━━━━━━━━━━━━━━
+        send_payment(call, "PREMIUM VIP", "₹199")
 
-🛡 Admin:
-{ADMIN_USERNAME}
-""",
-            reply_markup=markup
-        )
+    # ======================================
+    # FEATURES
+    # ======================================
 
-    # FEATURES BUTTON
     elif call.data == "features":
 
         bot.send_message(
             call.message.chat.id,
             """
-🔥 VIP FEATURES
+✨🔥 VIP FEATURES 🔥✨
 
 ━━━━━━━━━━━━━━━
 
-✅ HD Premium Content
-✅ VIP Private Access
-✅ Fast Support
-✅ Trusted Service
-✅ Smooth Experience
+🥈 LITE VIP
+✅ Basic Premium Access
+✅ HD Content
+✅ Fast Delivery
 
-💎 Price: ₹99 Only
+━━━━━━━━━━━━━━━
+
+🥇 MEDIUM VIP
+✅ Extra Premium Content
+✅ Priority Support
+✅ Better Experience
+
+━━━━━━━━━━━━━━━
+
+👑 PREMIUM VIP
+✅ Full Premium Access
+✅ Instant Priority Delivery
+✅ Exclusive VIP Content
+✅ Ultimate Experience
 """
         )
 
-    # PAYMENT DONE BUTTON
+    # ======================================
+    # REVIEWS
+    # ======================================
+
+    elif call.data == "reviews":
+
+        bot.send_message(
+            call.message.chat.id,
+            """
+⭐ USER REVIEWS ⭐
+
+━━━━━━━━━━━━━━━
+
+✅ Trusted Service
+✅ Fast Verification
+✅ Smooth Delivery
+✅ Premium Experience
+
+👑 VIP USERS LOVE IT
+"""
+        )
+
+    # ======================================
+    # PAYMENT DONE
+    # ======================================
+
     elif call.data == "done":
 
         bot.send_message(
             call.message.chat.id,
             """
-📸 Please send payment screenshot.
+📸 SEND PAYMENT SCREENSHOT
 
-⏳ Waiting for verification.
+⏳ WAITING FOR VERIFICATION...
 """
         )
 
-# ====================================
+# ==========================================
+# PAYMENT FUNCTION
+# ==========================================
+
+def send_payment(call, plan_name, amount):
+
+    qr = open("qr.jpg", "rb")
+
+    markup = InlineKeyboardMarkup(row_width=1)
+
+    done_btn = InlineKeyboardButton(
+        "✅ PAYMENT DONE",
+        callback_data="done"
+    )
+
+    markup.add(done_btn)
+
+    bot.send_photo(
+        call.message.chat.id,
+        qr,
+        caption=f"""
+✨💸 {plan_name} PAYMENT 💸✨
+
+━━━━━━━━━━━━━━━
+
+💰 Amount: {amount}
+
+🏦 UPI ID:
+{UPI_ID}
+
+✅ Pay Via QR or UPI
+📸 Send Screenshot After Payment
+
+⚡ Verification Usually Takes Few Minutes
+
+━━━━━━━━━━━━━━━
+
+👑 ADMIN:
+{ADMIN_USERNAME}
+""",
+        reply_markup=markup
+    )
+
+# ==========================================
 # SCREENSHOT HANDLER
-# ====================================
+# ==========================================
 
 @bot.message_handler(content_types=['photo'])
 def payment_screenshot(message):
 
+    plan = user_plan.get(
+        message.chat.id,
+        "Unknown Plan"
+    )
+
     # Reply to user
     bot.reply_to(
         message,
-        """
+        f"""
 ✅ SCREENSHOT RECEIVED
 
-⏳ Waiting for admin verification.
+📦 Selected Plan:
+{plan}
+
+⏳ WAITING FOR ADMIN VERIFICATION...
 """
     )
 
@@ -181,7 +287,7 @@ def payment_screenshot(message):
         message.message_id
     )
 
-    # Approve / Reject buttons
+    # Admin approve/reject buttons
     markup = InlineKeyboardMarkup(row_width=2)
 
     approve_btn = InlineKeyboardButton(
@@ -194,7 +300,10 @@ def payment_screenshot(message):
         callback_data=f"reject_{message.chat.id}"
     )
 
-    markup.add(approve_btn, reject_btn)
+    markup.add(
+        approve_btn,
+        reject_btn
+    )
 
     # Notify admin
     bot.send_message(
@@ -207,13 +316,16 @@ def payment_screenshot(message):
 
 🆔 User ID:
 {message.chat.id}
+
+📦 Plan:
+{plan}
 """,
         reply_markup=markup
     )
 
-# ====================================
-# ADMIN APPROVAL SYSTEM
-# ====================================
+# ==========================================
+# ADMIN ACTIONS
+# ==========================================
 
 @bot.callback_query_handler(
     func=lambda call:
@@ -222,53 +334,81 @@ def payment_screenshot(message):
 )
 def admin_action(call):
 
+    # ======================================
     # APPROVE USER
+    # ======================================
+
     if call.data.startswith("approve_"):
 
-        user_id = int(call.data.split("_")[1])
+        user_id = int(
+            call.data.split("_")[1]
+        )
+
+        plan = user_plan.get(
+            user_id,
+            "LITE VIP — ₹99"
+        )
+
+        # Select VIP link
+        if "LITE" in plan:
+            vip_link = LITE_LINK
+
+        elif "MEDIUM" in plan:
+            vip_link = MEDIUM_LINK
+
+        else:
+            vip_link = PREMIUM_LINK
 
         bot.send_message(
             user_id,
             f"""
-✅ PAYMENT VERIFIED
+✨✅ PAYMENT VERIFIED ✅✨
 
 🎉 VIP ACCESS APPROVED
 
-🔗 VIP LINK:
-{VIP_LINK}
+📦 PLAN:
+{plan}
 
-⚠ Do not share this link.
+🔗 VIP LINK:
+{vip_link}
+
+⚠ DO NOT SHARE THIS LINK
 """
         )
 
         bot.answer_callback_query(
             call.id,
-            "User Approved"
+            "USER APPROVED"
         )
 
+    # ======================================
     # REJECT USER
+    # ======================================
+
     elif call.data.startswith("reject_"):
 
-        user_id = int(call.data.split("_")[1])
+        user_id = int(
+            call.data.split("_")[1]
+        )
 
         bot.send_message(
             user_id,
             """
 ❌ PAYMENT NOT VERIFIED
 
-Please contact admin.
+📩 PLEASE CONTACT ADMIN
 """
         )
 
         bot.answer_callback_query(
             call.id,
-            "User Rejected"
+            "USER REJECTED"
         )
 
-# ====================================
-# BOT RUN
-# ====================================
+# ==========================================
+# RUN BOT
+# ==========================================
 
-print("🚀 Premium VIP Bot Running...")
+print("🚀 VIP PREMIUM BOT RUNNING...")
 
 bot.infinity_polling()
